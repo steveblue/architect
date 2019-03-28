@@ -11,7 +11,7 @@ export interface RollupBuilderOptions {
 }
 
 export function build(
-  options: RollupBuilderOptions,
+  options: any,
   root: string
 ): Observable<Promise<{}>> {
 
@@ -39,7 +39,7 @@ export function build(
 }
 
 export function execute(
-  options: RollupBuilderOptions,
+  options: any,
   context: BuilderContext,
 ): Observable<BuilderOutput> {
   return build(options, context.workspaceRoot).pipe(
@@ -51,4 +51,4 @@ export function execute(
   );
 }
 
-export default createBuilder<RollupBuilderOptions>(execute);
+export default createBuilder(execute);
