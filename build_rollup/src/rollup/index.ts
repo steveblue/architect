@@ -1,7 +1,6 @@
 
 
 import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect/src/index2';
-import { json } from '@angular-devkit/core';
 import { resolve, normalize } from 'path';
 import { exec } from 'child_process';
 import { Observable, from, of } from 'rxjs';
