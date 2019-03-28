@@ -1,20 +1,25 @@
 
+
 import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect/src/index2';
+import { json } from '@angular-devkit/core';
 import { resolve, normalize } from 'path';
 import { exec } from 'child_process';
 import { Observable, from, of } from 'rxjs';
 import { catchError, mapTo, switchMap } from 'rxjs/operators';
-import { Schema as RollupBuilderOptions } from './schema';
+
+export interface RollupBuilderOptions {
+  rollupConfig: string;
+}
 
 export function build(
   options: RollupBuilderOptions,
   root: string
-): Promise<string> {
+): Observable<Promise<{}>> {
 
-    return new Promise((res, rej) => {
+    const async = new Promise((res, rej) => {
 
           exec(normalize(root + '/node_modules/.bin/rollup') +
-              ' -c ' + options.config, {silent: true}, (error, stdout, stderr) => {
+              ' -c ' + options.rollupConfig, {}, (error, stdout, stderr) => {
 
                   if (stderr.includes('Error')) {
                       if (rej) rej(error);
@@ -29,14 +34,16 @@ export function build(
                   }
 
           });
-      })
+      });
+
+    return of(async);
 }
 
 export function execute(
   options: RollupBuilderOptions,
   context: BuilderContext,
 ): Observable<BuilderOutput> {
-  return from(build(options, context.workspaceRoot)).pipe(
+  return build(options, context.workspaceRoot).pipe(
     mapTo({ success: true }),
     catchError(error => {
       context.reportStatus('Error: ' + error);
@@ -45,5 +52,4 @@ export function execute(
   );
 }
 
-export { RollupBuilderOptions };
-export default createBuilder<Record<string, string> & RollupBuilderOptions>(execute);
+export default createBuilder<RollupBuilderOptions>(execute);

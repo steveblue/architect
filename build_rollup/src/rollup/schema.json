@@ -4,7 +4,7 @@
   "description": "Rollup Builder schema for Architect.",
   "type": "object",
   "properties": {
-    "config": {
+    "rollupConfig": {
       "type": "string",
       "description": "The path to the Rollup configuration file."
     },
@@ -16,6 +16,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "config"
+    "rollupConfig"
   ]
 }
