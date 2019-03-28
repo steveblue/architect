@@ -1,0 +1,11 @@
+{
+  "$schema": "@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "rollup": {
+      "implementation": "./src/rollup/index",
+      "class": "./src/rollup",
+      "schema": "./src/rollup/schema.json",
+      "description": "Build a rollup app."
+    }
+  }
+}

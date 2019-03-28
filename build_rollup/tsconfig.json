@@ -1,0 +1,13 @@
+{
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "removeComments": false
+  },
+  "include": [
+    "./src/**/*.ts"
+  ]
+}

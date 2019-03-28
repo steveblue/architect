@@ -10,6 +10,12 @@
       "prefix": "app",
       "schematics": {},
       "architect": {
+        "rollup": {
+          "builder": "./build_rollup:rollup",
+          "options": {
+            "config": "rollup.config.js"
+          }
+        },
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
