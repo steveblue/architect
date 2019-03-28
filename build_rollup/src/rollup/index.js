@@ -5,7 +5,28 @@ const path_1 = require("path");
 const child_process_1 = require("child_process");
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
-function build(options, root) {
+function ngc(options, root) {
+    const async = new Promise((res, rej) => {
+        child_process_1.exec(path_1.normalize(root + '/node_modules/.bin/ngc') +
+            ' -p ' + options.tsConfig, {}, (error, stdout, stderr) => {
+            if (stderr.includes('Error')) {
+                if (rej)
+                    rej(error);
+                //TODO: figure out how to hook into logging
+                //log.error(stderr);
+                console.log(stderr);
+            }
+            else {
+                //log.message(stderr);
+                console.log(stderr);
+                res(stderr);
+            }
+        });
+    });
+    return rxjs_1.of(async);
+}
+exports.ngc = ngc;
+function rollup(options, root) {
     const async = new Promise((res, rej) => {
         child_process_1.exec(path_1.normalize(root + '/node_modules/.bin/rollup') +
             ' -c ' + options.rollupConfig, {}, (error, stdout, stderr) => {
@@ -25,9 +46,9 @@ function build(options, root) {
     });
     return rxjs_1.of(async);
 }
-exports.build = build;
+exports.rollup = rollup;
 function execute(options, context) {
-    return build(options, context.workspaceRoot).pipe(operators_1.mapTo({ success: true }), operators_1.catchError(error => {
+    return ngc(options, context.workspaceRoot).pipe(operators_1.switchMap(ngc => rollup(options, context.workspaceRoot)), operators_1.mapTo({ success: true }), operators_1.catchError(error => {
         context.reportStatus('Error: ' + error);
         return [{ success: false }];
     }));

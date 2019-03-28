@@ -4,6 +4,10 @@
   "description": "Rollup Builder schema for Architect.",
   "type": "object",
   "properties": {
+    "tsConfig": {
+      "type": "string",
+      "description": "The path to the Rollup configuration file."
+    },
     "rollupConfig": {
       "type": "string",
       "description": "The path to the Rollup configuration file."

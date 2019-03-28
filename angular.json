@@ -13,7 +13,8 @@
         "rollup": {
           "builder": "./build_rollup:rollup",
           "options": {
-            "rollupConfig": "rollup.config.js"
+            "rollupConfig": "rollup.config.js",
+            "tsConfig": "src/tsconfig.app.json"
           }
         },
         "build": {
