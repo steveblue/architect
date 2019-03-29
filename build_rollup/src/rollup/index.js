@@ -7,7 +7,7 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 function ngc(options, context) {
     return new Promise((res, rej) => {
-        child_process_1.exec(path_1.join(context.workspaceRoot, 'node_modules', '.bin', 'ngc') +
+        child_process_1.exec(path_1.normalize(context.workspaceRoot + '/node_modules/.bin/ngc') +
             ' -p ' + options.tsConfig, {}, (error, stdout, stderr) => {
             if (stderr) {
                 context.reportStatus(stderr);

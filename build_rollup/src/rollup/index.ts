@@ -14,7 +14,7 @@ export function ngc(
 
     return new Promise((res, rej) => {
 
-        exec(join(context.workspaceRoot, 'node_modules', '.bin', 'ngc') +
+        exec(normalize(context.workspaceRoot +'/node_modules/.bin/ngc') +
              ' -p ' + options.tsConfig,
              {},
              (error, stdout, stderr) => {
