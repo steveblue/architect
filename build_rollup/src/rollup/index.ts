@@ -67,6 +67,7 @@ export function execute(
   options: RollupBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
+
   context.reportProgress(2, 5, 'ngc');
   return from(build(options, context)).pipe(
     mapTo({ success: true }),
