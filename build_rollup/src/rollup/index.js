@@ -7,15 +7,15 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 function ngc(options, context) {
     return new Promise((res, rej) => {
-        child_process_1.exec(path_1.normalize(context.workspaceRoot + '/node_modules/.bin/ngc') +
+        child_process_1.exec(path_1.join(context.workspaceRoot, 'node_modules', '.bin', 'ngc') +
             ' -p ' + options.tsConfig, {}, (error, stdout, stderr) => {
-            if (stderr.includes('Error')) {
-                if (rej)
-                    rej(error);
+            if (stderr) {
+                context.reportStatus(stderr);
             }
             else {
                 context.reportProgress(3, 5, stdout);
-                res(stderr);
+                context.reportStatus('Compilation complete.');
+                res();
             }
         });
     });
@@ -29,9 +29,10 @@ function rollup(options, context) {
             if (stderr.includes('Error')) {
                 if (rej)
                     rej(error);
+                context.reportStatus(stderr);
             }
             else {
-                context.reportProgress(5, 5, stdout);
+                context.reportProgress(5, 5, stderr);
                 res(stderr);
             }
         });
@@ -41,7 +42,7 @@ exports.rollup = rollup;
 async function build(options, context) {
     await ngc(options, context);
     await rollup(options, context);
-    return options;
+    return { options, context };
 }
 function execute(options, context) {
     context.reportProgress(2, 5, 'ngc');

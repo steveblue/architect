@@ -1,7 +1,7 @@
 import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect/src/index2';
 import { json } from '@angular-devkit/core';
 import { exec } from 'child_process';
-import { resolve, normalize } from 'path';
+import { resolve, normalize, join } from 'path';
 import { Observable, from, of } from 'rxjs';
 import { catchError, mapTo, map } from 'rxjs/operators';
 import { RollupBuilderSchema } from './schema.interface';
@@ -14,16 +14,19 @@ export function ngc(
 
     return new Promise((res, rej) => {
 
-        exec(normalize(context.workspaceRoot + '/node_modules/.bin/ngc') +
-            ' -p ' + options.tsConfig, {}, (error, stdout, stderr) => {
-                if (stderr.includes('Error')) {
-                    if (rej) rej(error);
-                } else {
-                    context.reportProgress(3, 5, stdout);
-                    res(stderr);
-                }
-
+        exec(join(context.workspaceRoot, 'node_modules', '.bin', 'ngc') +
+             ' -p ' + options.tsConfig,
+             {},
+             (error, stdout, stderr) => {
+              if (stderr) {
+                  context.reportStatus(stderr);
+              } else {
+                  context.reportProgress(3, 5, stdout);
+                  context.reportStatus('Compilation complete.');
+                  res();
+              }
         });
+
     });
 
 }
@@ -40,9 +43,9 @@ export function rollup(
             ' -c ' + options.rollupConfig, {}, (error, stdout, stderr) => {
                 if (stderr.includes('Error')) {
                     if (rej) rej(error);
-
+                    context.reportStatus(stderr);
                 } else {
-                    context.reportProgress(5, 5, stdout);
+                    context.reportProgress(5, 5, stderr);
                     res(stderr);
                 }
 
@@ -58,7 +61,7 @@ async function build(
   await ngc(options, context);
   await rollup(options, context);
 
-  return options;
+  return { options, context };
 
 }
 
