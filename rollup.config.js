@@ -1,4 +1,5 @@
 import nodeResolve from 'rollup-plugin-node-resolve';
+import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
 
 class ResolveRxjs {
@@ -29,7 +30,7 @@ class ResolveAngular {
 }
 
 
-export default {
+export default [{
     input: 'out-tsc/app/src/main.js',
     treeshake: true,
     output: {
@@ -48,4 +49,23 @@ export default {
         console.log(message);
 
     }
-}
+},
+{
+    input: 'src/polyfills.ts',
+    treeshake: true,
+    output: {
+        name: 'polyfills',
+        file: 'dist/build_repo/polyfills.js',
+        format: 'iife'
+    },
+    plugins: [
+        nodeResolve(),
+        typescript(),
+        terser()
+    ],
+    onwarn: function (message) {
+
+        console.log(message);
+
+    }
+}]
