@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'architect-rollup'`, () => {
+  it(`should have as title 'build_repo'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('architect-rollup');
+    expect(app.title).toEqual('build_repo');
   });
 
   it('should render title in a h1 tag', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to architect-rollup!');
+    expect(compiled.querySelector('h1').textContent).toContain('Welcome to build_repo!');
   });
 });

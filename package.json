@@ -1,5 +1,5 @@
 {
-  "name": "architect-rollup",
+  "name": "build_repo",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -8,8 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build:builders": "rm -rf out-tsc && tsc -p build_rollup/tsconfig.json",
-    "rollup": "architect architect-rollup:rollup"
+    "rollup": "architect build_repo:rollup"
   },
   "private": true,
   "dependencies": {

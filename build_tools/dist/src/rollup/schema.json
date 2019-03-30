@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Rollup Builder.",
+  "description": "Rollup Builder schema for Architect.",
+  "type": "object",
+  "properties": {
+    "tsConfig": {
+      "type": "string",
+      "description": "The path to the Rollup configuration file."
+    },
+    "rollupConfig": {
+      "type": "string",
+      "description": "The path to the Rollup configuration file."
+    },
+    "watch": {
+      "type": "boolean",
+      "description": "Run build when files change.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "rollupConfig"
+  ]
+}

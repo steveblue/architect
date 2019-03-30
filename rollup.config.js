@@ -34,7 +34,7 @@ export default {
     treeshake: true,
     output: {
         name: 'app',
-        file: 'dist/architect-rollup/main.js',
+        file: 'dist/build_repo/main.js',
         format: 'iife'
     },
     plugins: [

@@ -1,0 +1,20 @@
+{
+  "name": "build_tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^3.3.4000"
+  },
+  "devDependencies": {
+    "@angular-devkit/architect": "^0.800.0-beta.10",
+    "@angular-devkit/core": "^8.0.0-beta.10"
+  }
+}
