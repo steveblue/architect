@@ -4,6 +4,7 @@
 /dist
 /tmp
 /out-tsc
+/closure
 /build_tools/dist
 /build_tools/node_modules
 
