@@ -1,4 +1,5 @@
 import nodeResolve from 'rollup-plugin-node-resolve';
+import { terser } from 'rollup-plugin-terser';
 
 class ResolveRxjs {
     resolveId(importee, importer) {
@@ -33,13 +34,14 @@ export default {
     treeshake: true,
     output: {
         name: 'app',
-        file: 'dist/architect-rollup/bundle.es2015.js',
+        file: 'dist/architect-rollup/main.js',
         format: 'iife'
     },
     plugins: [
         new ResolveRxjs(),
         new ResolveAngular(),
-        nodeResolve()
+        nodeResolve(),
+        terser()
     ],
     onwarn: function (message) {
 

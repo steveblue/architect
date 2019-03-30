@@ -27,5 +27,8 @@
   ],
   "include": [
     "./src/**/*.ts"
+  ],
+  "excludes": [
+    "./src/rollup/schema.interface.ts"
   ]
 }
