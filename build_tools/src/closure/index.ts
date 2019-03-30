@@ -5,7 +5,7 @@ import { exec, spawn } from 'child_process';
 import { normalize, join } from 'path';
 import { writeFile, readFile } from 'fs';
 
-import { Observable, from } from 'rxjs';
+import { Observable, defer } from 'rxjs';
 import { catchError, mapTo } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
@@ -84,26 +84,21 @@ export function closure(
     })
 }
 
-async function buildClosure(
-  options: ClosureBuilderSchema,
-  context: BuilderContext,
-): Promise<ClosureBuilderSchema> {
-
-  await ngc(options, context);
-  await compileMain(options, context);
-  await rollupRxJS(options, context);
-  await closure(options, context);
-
-  return options;
-
-}
-
 export function executeClosure(
   options: ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
   context.reportProgress(1, 5, 'ngc');
-  return from(buildClosure(options, context)).pipe(
+  return defer(async function(): Promise<{}> {
+
+    await ngc(options, context);
+    await compileMain(options, context);
+    await rollupRxJS(options, context);
+    await closure(options, context);
+
+    return { options, context };
+
+  }).pipe(
     mapTo({ success: true }),
     catchError(error => {
       context.reportStatus('Error: ' + error);
