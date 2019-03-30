@@ -5,17 +5,17 @@ import { exec, spawn } from 'child_process';
 import { normalize, join } from 'path';
 import { writeFile, readFile } from 'fs';
 
-import { Observable, defer } from 'rxjs';
-import { catchError, mapTo } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, mapTo, concatMap } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
 
 export function rollupRxJS(
   options: ClosureBuilderSchema,
   context: BuilderContext
-): Promise<{}> {
+): Observable<{}> {
 
-  return new Promise((res, rej) => {
+  return new Observable((observer) => {
 
     let editFile = (filePath) => {
       return new Promise((res) => {
@@ -50,7 +50,7 @@ export function rollupRxJS(
       editFile('node_modules/rxjs/testing/package.json'),
       editFile('node_modules/rxjs/webSocket/package.json')])
         .then(data => {
-          res();
+          observer.next();
         });
 
     });
@@ -60,9 +60,9 @@ export function rollupRxJS(
 export function closure(
   options: ClosureBuilderSchema,
    context: BuilderContext
-): Promise<{}> {
+): Observable<{}> {
 
-  return new Promise((res, rej) => {
+  return new Observable((observer) => {
 
     const jarPath = join('node_modules', 'google-closure-compiler-java', 'compiler.jar');
     const warningLevel = 'QUIET';
@@ -73,13 +73,8 @@ export function closure(
     exec(`java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`,
         {},
         (error, stdout, stderr) => {
-            //log.stop('closure compiler');
-            console.log(error, stdout, stderr);
-            if (res) {
-              context.reportProgress(5, 5, stderr);
-              res();
-            }
-
+          context.reportProgress(5, 5, stderr);
+          observer.next();
         });
     })
 }
@@ -89,16 +84,11 @@ export function executeClosure(
   context: BuilderContext
 ): Observable<BuilderOutput> {
   context.reportProgress(1, 5, 'ngc');
-  return defer(async function(): Promise<{}> {
-
-    await ngc(options, context);
-    await compileMain(options, context);
-    await rollupRxJS(options, context);
-    await closure(options, context);
-
-    return { options, context };
-
-  }).pipe(
+  return of(context).pipe(
+    concatMap( results => ngc(options, context) ),
+    concatMap( results => compileMain(options, context) ),
+    concatMap( results => rollupRxJS(options, context) ),
+    concatMap( results => closure(options, context) ),
     mapTo({ success: true }),
     catchError(error => {
       context.reportStatus('Error: ' + error);

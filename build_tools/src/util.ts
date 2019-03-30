@@ -6,14 +6,16 @@ import { exec } from 'child_process';
 import { normalize, join } from 'path';
 import { readFileSync, writeFile, readFile } from 'fs';
 
+import { Observable } from 'rxjs';
+
 import { BuilderContext } from '@angular-devkit/architect/src/index2';
 import { AbstractBuilderSchema } from './abstract.interface';
 
 export function compileMain(
   options: AbstractBuilderSchema,
   context: BuilderContext
-): Promise<{}> {
-    return new Promise((res, rej) => {
+): Observable<{}> {
+    return new Observable((observer) => {
 
         const inFile = normalize(context.workspaceRoot+'/src/main.ts');
         const outFile = normalize('out-tsc/app/src/main.js');
@@ -21,7 +23,7 @@ export function compileMain(
 
         readFile(inFile, 'utf8', (err, contents) => {
 
-            if (err) rej(err);
+            if (err) observer.error(err);
 
             contents = contents.replace(/platformBrowserDynamic/g, 'platformBrowser');
             contents = contents.replace(/platform-browser-dynamic/g, 'platform-browser');
@@ -35,9 +37,9 @@ export function compileMain(
             })
 
             writeFile(outFile, outputContent.outputText, (err) => {
-               if (err) rej(err);
+               if (err) observer.error(err);
                context.reportProgress(2, 5, 'aot');
-               res();
+               observer.next();
             });
 
         });
@@ -48,21 +50,21 @@ export function compileMain(
 export function ngc(
   options: AbstractBuilderSchema,
   context: BuilderContext
-): Promise<{}> {
+): Observable<{}> {
 
-    return new Promise((res, rej) => {
+    return new Observable((observer) => {
 
         exec(normalize(context.workspaceRoot +'/node_modules/.bin/ngc') +
              ' -p ' + options.tsConfig,
              {},
              (error, stdout, stderr) => {
               if (stderr) {
-                  if (rej) rej(error);
+                  observer.error(error);
                   context.reportStatus(stderr);
               } else {
                   context.reportProgress(3, 5, stdout);
                   context.reportStatus('Compilation complete.');
-                  res();
+                  observer.next();
               }
         });
 

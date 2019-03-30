@@ -4,26 +4,26 @@ import { compileMain, ngc } from './../util';
 import { exec } from 'child_process';
 import { normalize } from 'path';
 
-import { Observable, defer } from 'rxjs';
-import { catchError, mapTo } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, mapTo, concatMap } from 'rxjs/operators';
 
 import { RollupBuilderSchema } from './schema.interface';
 
 export function rollup(
   options: RollupBuilderSchema,
    context: BuilderContext
-): Promise<{}> {
+): Observable<{}> {
 
-    return new Promise((res, rej) => {
+    return new Observable((observer) => {
         context.reportProgress(4, 5, 'rollup');
         exec(normalize(context.workspaceRoot + '/node_modules/.bin/rollup') +
             ' -c ' + options.rollupConfig, {}, (error, stdout, stderr) => {
                 if (stderr.includes('Error')) {
-                    if (rej) rej(error);
+                    observer.error(error);
                     context.reportStatus(stderr);
                 } else {
                     context.reportProgress(5, 5, stderr);
-                    res(stderr);
+                    observer.next(stderr);
                 }
 
         });
@@ -35,21 +35,16 @@ export function executeRollup(
   context: BuilderContext
 ): Observable<BuilderOutput> {
   context.reportProgress(1, 5, 'ngc');
-  return defer(async function(): Promise<{}> {
-
-    await ngc(options, context);
-    await compileMain(options, context);
-    await rollup(options, context);
-
-    return { options, context };
-
-  }).pipe(
-    mapTo({ success: true }),
-    catchError(error => {
-      context.reportStatus('Error: ' + error);
-      return [{ success: false }];
-    }),
-  );
+  return of(context).pipe(
+            concatMap( results => ngc(options, context) ),
+            concatMap( results => compileMain(options, context) ),
+            concatMap( results => rollup(options, context) ),
+            mapTo({ success: true }),
+            catchError(error => {
+              context.reportStatus('Error: ' + error);
+              return [{ success: false }];
+            })
+          );
 }
 
 export default createBuilder<Record<string, string> & RollupBuilderSchema>(executeRollup);
