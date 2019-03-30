@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json",
+    "build": "./build.sh",
     "watch": "tsc -p tsconfig.json --watch"
   },
   "author": "",
@@ -15,6 +15,9 @@
   },
   "devDependencies": {
     "@angular-devkit/architect": "^0.800.0-beta.10",
-    "@angular-devkit/core": "^8.0.0-beta.10"
-  }
+    "@angular-devkit/core": "^8.0.0-beta.10",
+    "@types/json-schema": "^7.0.3",
+    "@types/node": "^11.12.1"
+  },
+  "builders": "builders.json"
 }
