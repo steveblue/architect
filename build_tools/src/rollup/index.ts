@@ -30,7 +30,7 @@ export function rollup(
     });
 }
 
-async function build(
+async function buildRollup(
   options: RollupBuilderSchema,
   context: BuilderContext,
 ): Promise<RollupBuilderSchema> {
@@ -43,12 +43,12 @@ async function build(
 
 }
 
-export function execute(
+export function executeRollup(
   options: RollupBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
   context.reportProgress(1, 5, 'ngc');
-  return from(build(options, context)).pipe(
+  return from(buildRollup(options, context)).pipe(
     mapTo({ success: true }),
     catchError(error => {
       context.reportStatus('Error: ' + error);
@@ -57,4 +57,4 @@ export function execute(
   );
 }
 
-export default createBuilder<Record<string, string> & RollupBuilderSchema>(execute);
+export default createBuilder<Record<string, string> & RollupBuilderSchema>(executeRollup);

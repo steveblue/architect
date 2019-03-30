@@ -10,6 +10,13 @@
       "prefix": "app",
       "schematics": {},
       "architect": {
+        "closure": {
+          "builder": "./build_tools/dist:closure",
+          "options": {
+            "closureConfig": "closure.conf",
+            "tsConfig": "src/tsconfig.app.json"
+          }
+        },
         "rollup": {
           "builder": "./build_tools/dist:rollup",
           "options": {

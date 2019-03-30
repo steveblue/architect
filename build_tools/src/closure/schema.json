@@ -1,16 +1,16 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "title": "Rollup Builder.",
-  "description": "Rollup Builder schema for Architect.",
+  "title": "Closure Compiler Builder.",
+  "description": "Closure Compiler schema for Architect.",
   "type": "object",
   "properties": {
     "tsConfig": {
       "type": "string",
       "description": "The path to the Typescript configuration file."
     },
-    "rollupConfig": {
+    "closureConfig": {
       "type": "string",
-      "description": "The path to the Rollup configuration file."
+      "description": "The path to the Closure Compiler configuration file."
     },
     "watch": {
       "type": "boolean",
@@ -20,7 +20,7 @@
   },
   "additionalProperties": false,
   "required": [
-    "rollupConfig",
+    "closureConfig",
     "tsConfig"
   ]
 }

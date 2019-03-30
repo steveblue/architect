@@ -6,6 +6,12 @@
       "class": "./src/rollup",
       "schema": "./src/rollup/schema.json",
       "description": "Build a rollup app."
+    },
+    "closure": {
+      "implementation": "./src/closure/index",
+      "class": "./src/closure",
+      "schema": "./src/closure/schema.json",
+      "description": "Build a closure compiler app."
     }
   }
 }
