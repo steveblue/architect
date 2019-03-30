@@ -9,7 +9,6 @@ import { Observable, from } from 'rxjs';
 import { catchError, mapTo } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
-import { rejects } from 'assert';
 
 export function rollupRxJS(
   options: ClosureBuilderSchema,
