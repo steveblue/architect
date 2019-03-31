@@ -17,6 +17,21 @@ ng run app:closure
 
 builds workspace with Closure Compiler.
 
+NOTE:
+
+This is currently an additional step needed to bundle with Closure Compiler.
+
+```
+code ./node_modules/tslib/package.json
+```
+
+Add this line to the tslib package.json.
+
+```
+"es2015": "tslib.es6.js",
+```
+
+
 
 ## Getting started
 
