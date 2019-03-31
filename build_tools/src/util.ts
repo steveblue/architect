@@ -17,6 +17,7 @@ export function compileMain(
   options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<{}> {
+    context.reportStatus('aot');
     return new Observable((observer) => {
 
         const inFile = normalize(context.workspaceRoot+'/src/main.ts');

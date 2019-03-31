@@ -13,7 +13,7 @@ export function rollup(
   options: RollupBuilderSchema,
    context: BuilderContext
 ): Observable<{}> {
-
+    context.reportStatus('rollup');
     return new Observable((observer) => {
         context.reportProgress(options.step++, options.tally, 'rollup');
         exec(normalize(context.workspaceRoot + '/node_modules/.bin/rollup') +

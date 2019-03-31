@@ -14,7 +14,7 @@ export function rollupRxJS(
   options: ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<{}> {
-
+  context.reportStatus('rollup rxjs');
   return new Observable((observer) => {
 
     let editFile = (filePath) => {
@@ -61,7 +61,7 @@ export function closure(
   options: ClosureBuilderSchema,
    context: BuilderContext
 ): Observable<{}> {
-
+  context.reportStatus('closure');
   return new Observable((observer) => {
 
     const jarPath = join('node_modules', 'google-closure-compiler-java', 'compiler.jar');
@@ -73,7 +73,7 @@ export function closure(
     exec(`java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`,
         {},
         (error, stdout, stderr) => {
-          context.reportStatus(stderr);
+
           context.reportProgress(options.step++, options.tally, 'closure');
           observer.next(stdout);
         });
