@@ -1,16 +1,54 @@
+
+import { BuilderContext } from '@angular-devkit/architect/src/index2';
+import { buildOptimizer } from '@angular-devkit/build-optimizer';
+
 import { ClosureBuilderSchema } from './closure/schema.interface';
 import { RollupBuilderSchema } from './rollup/schema.interface';
 
 import * as ts from 'typescript';
+import { Observable, of } from 'rxjs';
 
 import { exec } from 'child_process';
 import { normalize, join } from 'path';
+import { glob } from 'glob';
 import { readFileSync, writeFile, readFile } from 'fs';
 
-import { Observable } from 'rxjs';
-
-import { BuilderContext } from '@angular-devkit/architect/src/index2';
 import { AbstractBuilderSchema } from './abstract.interface';
+
+
+export function handleEnvironment(
+    options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
+    context: BuilderContext
+  ): Observable<{}> {
+
+    // TODO: handle different environments
+    return of(exec('cp '+
+                normalize('out-tsc/app/src/environments/environment.prod.js') + ' ' +
+                normalize('out-tsc/app/src/environments/environment.js')
+             ));
+}
+
+export function optimizeBuild(
+    options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
+    context: BuilderContext
+  ): Observable<{}> {
+
+    // TODO: convert to Observable pattern
+    const files = glob.sync(normalize('out-tsc/**/*.component.js'));
+
+    return of(Promise.all(files.map((file) => {
+        return new Promise((res, rej) => {
+            readFile(file, 'utf-8', (err, data) => {
+            if (err) rej(err);
+            writeFile(file, buildOptimizer({ content: data }).content, (err) => {
+                if (err) rej(err);
+                res(file);
+            });
+        });
+        })
+    })));
+
+}
 
 export function compileMain(
   options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,

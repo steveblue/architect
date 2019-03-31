@@ -1,5 +1,5 @@
 import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect/src/index2';
-import { compileMain, ngc } from './../util';
+import { compileMain, ngc, optimizeBuild, handleEnvironment } from './../util';
 
 import { exec } from 'child_process';
 import { normalize, join } from 'path';
@@ -48,6 +48,8 @@ export function executeRollup(
   return of(context).pipe(
             concatMap( results => ngc(options, context) ),
             (options.compilationMode !== 'aot') ? concatMap( results => of(results) ) : concatMap( results => compileMain(options, context) ),
+            concatMap( results => optimizeBuild(options, context)),
+            concatMap( results => handleEnvironment(options, context)),
             concatMap( results => rollup(options, context) ),
             mapTo({ success: true }),
             catchError(error => {

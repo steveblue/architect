@@ -31,12 +31,16 @@ class ResolveAngular {
 
 
 export default [{
-    input: 'out-tsc/app/src/main.js',
+    input: ['out-tsc/app/src/main.js',
+            'out-tsc/app/src/app/routes/lazy1/lazy1.module.ngfactory.js',
+            'out-tsc/app/src/app/routes/lazy2/lazy2.module.ngfactory.js',
+            'out-tsc/app/src/app/routes/lazy3/lazy3.module.ngfactory.js'
+    ],
     treeshake: true,
     output: {
-        name: 'app',
-        file: 'dist/build_repo/main.js',
-        format: 'iife'
+        dir: 'dist/build_repo',
+        format: 'es',
+        sourcemap: true
     },
     plugins: [
         new ResolveRxjs(),

@@ -16,6 +16,7 @@
     "typescript": "^3.3.4000"
   },
   "devDependencies": {
+    "@angular-devkit/build-optimizer": "^0.800.0-beta.10",
     "@angular-devkit/architect": "^0.800.0-beta.10",
     "@angular-devkit/core": "^8.0.0-beta.10",
     "@types/json-schema": "^7.0.3",

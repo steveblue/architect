@@ -95,3 +95,43 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Lazyloading
+
+Lazyloading is possible with Rollup in this branch, however will require some postprocessing of the AOT compiled code to get it right. Lazyloading with Closure Compiler is also possible, however a method is needed for code splitting. Closure Compiler could make output chunks more optimal than Rollup.
+
+A lazyloaded route typically looks like this.
+```
+{ path: '', loadChildren: './routes/lazy1/lazy1.module#Lazy1Module' }
+```
+
+This is well and good however AOT compilation spits out a module called `Lazy1ModuleNgFactory` in a file called `lazy1.module.ngfactory` and Rollup puts all modules in a single directory. Rollup also requires import syntax and system.js to be included on the page. `s.js` can be used instead of `system.js`:
+
+```
+() => import('./lazy1.module.ngfactory').then(m => m.Lazy1ModuleNgFactory)
+```
+
+Lazyloading with Closure Compiler is possible but requires some work to figure out code splitting.
+
+The workflow that has worked in the past is as follows:
+
+- bundle all modules separately with compiler.jar (main.js, lazy1.module.ngfactory.js, etc)
+- use output manifest to find duplicate dependencies
+- pull shared dependencies into vendor chunk
+- load unique module dependencies into module chunk(s)
+- write .conf file that configures closure compiler to bundle chunks
+- run compiler.jar application to optimize project
+
+Proposed new workflow:
+
+- query project for lazyloaded modules
+- find dependencies for each module
+- pull shared dependencies into vendor chunk
+- load unique dependencies into module chunk(s)
+- write .conf file that configures closure compiler to bundle chunks
+- run compiler.jar application to optimize project
+
+
+
+
+
