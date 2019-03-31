@@ -3,10 +3,13 @@ import { compileMain, ngc } from './../util';
 
 import { exec } from 'child_process';
 import { normalize, join } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, readFile } from 'fs';
+import { glob } from 'glob';
+import * as ts from 'typescript';
+import { tsquery } from '@phenomnomnominal/tsquery';
 
-import { Observable, of } from 'rxjs';
-import { catchError, mapTo, concatMap } from 'rxjs/operators';
+import { Observable, of, from } from 'rxjs';
+import { catchError, map, mapTo, concatMap, mergeMap } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
 
@@ -24,8 +27,10 @@ export function closure(
     const outFile = options.outFile  ? options.outFile : `./dist/${target.project}/main.js`;
     const manifestPath = options.manifest  ? normalize(options.manifest) :  normalize('closure/manifest.MF');
 
-    exec(`java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`,
-        {},
+    const cmd = `java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`;
+
+    exec(cmd,
+         {},
         (error, stdout, stderr) => {
           if (stderr.includes('ERROR')) {
             observer.error(error);
@@ -34,6 +39,37 @@ export function closure(
           observer.next(stdout);
         });
     })
+}
+
+export function queryAST(
+  options: ClosureBuilderSchema,
+  context: BuilderContext
+): Observable<{}> {
+
+  const LOAD_CHILDREN_SPLIT = '#';
+  const LOAD_CHILDREN_VALUE_QUERY = `StringLiteral[value=/.*${LOAD_CHILDREN_SPLIT}.*/]`;
+  const LOAD_CHILDREN_ASSIGNMENT_QUERY = `PropertyAssignment:not(:has(Identifier[name="children"])):has(Identifier[name="loadChildren"]):has(${LOAD_CHILDREN_VALUE_QUERY})`;
+
+  return new Observable((observer) => {
+      glob('src/**/*.ts', options, function (err, files) {
+        if (err) observer.error(err);
+        console.log(files);
+        files.forEach(fileName => {
+          // Parse a file
+          const query = tsquery(ts.createSourceFile(
+            fileName,
+            readFileSync(fileName).toString(),
+            ts.ScriptTarget.ES2015
+          ), LOAD_CHILDREN_ASSIGNMENT_QUERY);
+
+          if (query.length) {
+            console.log(query);
+          }
+
+        });
+        observer.next();
+      })
+  })
 }
 
 export function executeClosure(
@@ -53,6 +89,7 @@ export function executeClosure(
   return of(context).pipe(
     concatMap( results => ngc(options, context) ),
     (options.compilationMode !== 'aot') ? concatMap( results => of(results) ) : concatMap( results => compileMain(options, context) ),
+    concatMap( results => queryAST(options, context) ),
     concatMap( results => closure(options, context) ),
     mapTo({ success: true }),
     catchError(error => {
