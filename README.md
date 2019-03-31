@@ -1,4 +1,59 @@
-# ArchitectRollup
+# Architect
+
+Building with Rollup and Closure Compiler using Angular Architect.
+
+This project allows you to do the following:
+
+```bash
+ng run app:rollup
+```
+
+builds workspace with Rollup.
+
+
+```bash
+ng run app:closure
+```
+
+builds workspace with Closure Compiler.
+
+
+## Getting started
+
+In the root directory run `yarn install` to get started.
+
+
+Install the latest architect CLI.
+
+```
+npm i -g @angular-devkit/core@next @angular-devkit/architect@next @angular-devkit/architect-cli@next
+```
+
+
+## /build_tools
+
+Builders are coded here.
+
+In this directory run `yarn install` to get started.
+
+```
+yarn build
+```
+triggers a build.
+
+```
+yarn watch
+```
+runs typescript in --watch mode.
+
+In the main repository root directory, run the 'rollup' or 'closure' build with Architect CLI.
+
+```
+architect build_repo:closure
+```
+
+
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.1.4.
 
