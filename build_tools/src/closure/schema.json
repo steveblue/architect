@@ -8,6 +8,10 @@
       "type": "string",
       "description": "The path to the Typescript configuration file."
     },
+    "compilationMode": {
+      "type": "string",
+      "description": "Overrides the compiler i.e. 'jit', 'aot', 'ivy'"
+    },
     "closureConfig": {
       "type": "string",
       "description": "The path to the Closure Compiler configuration file."

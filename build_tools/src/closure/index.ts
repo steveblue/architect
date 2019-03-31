@@ -1,9 +1,9 @@
 import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect/src/index2';
 import { compileMain, ngc } from './../util';
 
-import { exec, spawn } from 'child_process';
+import { exec } from 'child_process';
 import { normalize, join } from 'path';
-import { writeFile, readFile } from 'fs';
+import { readFileSync } from 'fs';
 
 import { Observable, of } from 'rxjs';
 import { catchError, mapTo, concatMap } from 'rxjs/operators';
@@ -40,11 +40,19 @@ export function executeClosure(
   options: ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
+
+  const tsConfig = JSON.parse(readFileSync(join(context.workspaceRoot, options.tsConfig), 'utf8'));
+
+  if (!options.compilationMode) {
+    options.compilationMode = tsConfig.angularCompilerOptions && tsConfig.angularCompilerOptions.enableIvy ? 'ivy' : 'aot';
+  }
+
   options.step = 0;
   options.tally = 3;
+
   return of(context).pipe(
     concatMap( results => ngc(options, context) ),
-    concatMap( results => compileMain(options, context) ),
+    (options.compilationMode !== 'aot') ? concatMap( results => of(results) ) : concatMap( results => compileMain(options, context) ),
     concatMap( results => closure(options, context) ),
     mapTo({ success: true }),
     catchError(error => {

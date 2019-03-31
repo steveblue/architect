@@ -2,7 +2,8 @@ import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/ar
 import { compileMain, ngc } from './../util';
 
 import { exec } from 'child_process';
-import { normalize } from 'path';
+import { normalize, join } from 'path';
+import { readFileSync } from 'fs';
 
 import { Observable, of } from 'rxjs';
 import { catchError, mapTo, concatMap } from 'rxjs/operators';
@@ -34,11 +35,19 @@ export function executeRollup(
   options: RollupBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
+
+  const tsConfig = JSON.parse(readFileSync(join(context.workspaceRoot, options.tsConfig), 'utf8'));
+
+  if (!options.compilationMode) {
+    options.compilationMode = tsConfig.angularCompilerOptions &&
+                              tsConfig.angularCompilerOptions.enableIvy === true ? 'ivy' : 'aot';
+  }
+
   options.step = 0;
   options.tally = 4;
   return of(context).pipe(
             concatMap( results => ngc(options, context) ),
-            concatMap( results => compileMain(options, context) ),
+            (options.compilationMode !== 'aot') ? concatMap( results => of(results) ) : concatMap( results => compileMain(options, context) ),
             concatMap( results => rollup(options, context) ),
             mapTo({ success: true }),
             catchError(error => {
