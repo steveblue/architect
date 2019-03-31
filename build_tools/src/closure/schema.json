@@ -16,6 +16,22 @@
       "type": "boolean",
       "description": "Run build when files change.",
       "default": false
+    },
+    "jarPath": {
+      "type": "string",
+      "description": "The path to the compiler.jar file."
+    },
+    "warningLevel": {
+      "type": "string",
+      "description": "The logging warning level for Closure Compiler."
+    },
+    "manifest": {
+      "type": "string",
+      "description": "Location to print the manifest."
+    },
+    "outFile": {
+      "type": "string",
+      "description": "Location to output the bundle."
     }
   },
   "additionalProperties": false,

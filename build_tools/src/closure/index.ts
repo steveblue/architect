@@ -10,70 +10,26 @@ import { catchError, mapTo, concatMap } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
 
-export function rollupRxJS(
-  options: ClosureBuilderSchema,
-  context: BuilderContext
-): Observable<{}> {
-  context.reportStatus('rollup rxjs');
-  return new Observable((observer) => {
-
-    let rollup;
-    const editFile = (filePath) => {
-      return new Promise((res) => {
-        readFile(filePath, 'utf-8', (error, stdout) => {
-          let pack = JSON.parse(stdout);
-          pack.es2015 = pack.es2015.replace('_esm2015', '_fesm2015');
-          writeFile(filePath, JSON.stringify(pack), () => {
-            res(filePath);
-          })
-        });
-      });
-    };
-
-    if (process.platform === 'win32') {
-      rollup = spawn('cmd', ['/c', join(context.workspaceRoot, 'node_modules', '.bin', 'rollup'), '-c', join('rollup.rxjs.js')]);
-    } else {
-      rollup = spawn(join(context.workspaceRoot, 'node_modules', '.bin', 'rollup'), ['-c', join('rollup.rxjs.js')]);
-    }
-
-    // rollup.stdout.on('data', (msg) => {
-    //   log.message(msg);
-    // });
-
-    rollup.on('exit', () => {
-
-      Promise.all([editFile('node_modules/rxjs/package.json'),
-                   editFile('node_modules/rxjs/operators/package.json'),
-                   editFile('node_modules/rxjs/ajax/package.json'),
-                   editFile('node_modules/rxjs/testing/package.json'),
-                   editFile('node_modules/rxjs/webSocket/package.json')])
-        .then(data => {
-          context.reportProgress(options.step++, options.tally, 'rollup rxjs');
-          observer.next(data);
-        });
-
-    });
-  });
-}
-
 export function closure(
-  options: ClosureBuilderSchema,
+   options: ClosureBuilderSchema,
    context: BuilderContext
 ): Observable<{}> {
   context.reportStatus('closure');
   return new Observable((observer) => {
 
-    // TODO: make these configurable
-    const jarPath = join('node_modules', 'google-closure-compiler-java', 'compiler.jar');
-    const warningLevel = 'QUIET';
-    const confPath = normalize('closure.conf');
-    const outFile = './dist/build_repo/main.js';
-    const manifestPath = normalize('closure/manifest.MF');
+    const target = context.target ? context.target : { project: 'app' };
+    const jarPath = options.jarPath ? options.jarPath : join('node_modules', 'google-closure-compiler-java', 'compiler.jar');
+    const warningLevel = options.warningLevel ? options.warningLevel : 'QUIET';
+    const confPath = options.closureConfig  ? normalize(options.closureConfig) : normalize('closure.conf');
+    const outFile = options.outFile  ? options.outFile : `./dist/${target.project}/main.js`;
+    const manifestPath = options.manifest  ? normalize(options.manifest) :  normalize('closure/manifest.MF');
 
     exec(`java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`,
         {},
         (error, stdout, stderr) => {
-
+          if (stderr.includes('ERROR')) {
+            observer.error(error);
+          }
           context.reportProgress(options.step++, options.tally, 'closure');
           observer.next(stdout);
         });
@@ -85,11 +41,10 @@ export function executeClosure(
   context: BuilderContext
 ): Observable<BuilderOutput> {
   options.step = 0;
-  options.tally = 5;
+  options.tally = 3;
   return of(context).pipe(
     concatMap( results => ngc(options, context) ),
     concatMap( results => compileMain(options, context) ),
-    concatMap( results => rollupRxJS(options, context) ),
     concatMap( results => closure(options, context) ),
     mapTo({ success: true }),
     catchError(error => {
