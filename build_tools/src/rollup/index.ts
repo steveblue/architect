@@ -15,14 +15,14 @@ export function rollup(
 ): Observable<{}> {
 
     return new Observable((observer) => {
-        context.reportProgress(4, 5, 'rollup');
+        context.reportProgress(options.step++, options.tally, 'rollup');
         exec(normalize(context.workspaceRoot + '/node_modules/.bin/rollup') +
             ' -c ' + options.rollupConfig, {}, (error, stdout, stderr) => {
                 if (stderr.includes('Error')) {
-                    observer.error(error);
                     context.reportStatus(stderr);
+                    observer.error(error);
                 } else {
-                    context.reportProgress(5, 5, stderr);
+                    context.reportProgress(options.step++, options.tally, 'rollup');
                     observer.next(stderr);
                 }
 
@@ -34,7 +34,8 @@ export function executeRollup(
   options: RollupBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
-  context.reportProgress(1, 5, 'ngc');
+  options.step = 0;
+  options.tally = 4;
   return of(context).pipe(
             concatMap( results => ngc(options, context) ),
             concatMap( results => compileMain(options, context) ),

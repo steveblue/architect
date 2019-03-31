@@ -1,5 +1,7 @@
 export interface AbstractBuilderSchema {
   tsConfig: string;
   rollupConfig?: string;
-  watch?: boolean;
+  watch: boolean;
+  step: number;
+  tally: number;
 }

@@ -1,3 +1,5 @@
+import { ClosureBuilderSchema } from './closure/schema.interface';
+import { RollupBuilderSchema } from './rollup/schema.interface';
 
 
 import * as ts from 'typescript';
@@ -12,7 +14,7 @@ import { BuilderContext } from '@angular-devkit/architect/src/index2';
 import { AbstractBuilderSchema } from './abstract.interface';
 
 export function compileMain(
-  options: AbstractBuilderSchema,
+  options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<{}> {
     return new Observable((observer) => {
@@ -37,8 +39,8 @@ export function compileMain(
             })
 
             writeFile(outFile, outputContent.outputText, (err) => {
+               context.reportProgress(options.step++, options.tally, 'aot');
                if (err) observer.error(err);
-               context.reportProgress(2, 5, 'aot');
                observer.next();
             });
 
@@ -48,10 +50,10 @@ export function compileMain(
 }
 
 export function ngc(
-  options: AbstractBuilderSchema,
+  options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<{}> {
-
+    context.reportProgress(options.step++, options.tally, 'ngc');
     return new Observable((observer) => {
 
         exec(normalize(context.workspaceRoot +'/node_modules/.bin/ngc') +
@@ -59,10 +61,10 @@ export function ngc(
              {},
              (error, stdout, stderr) => {
               if (stderr) {
-                  observer.error(error);
                   context.reportStatus(stderr);
+                  observer.error(stderr);
               } else {
-                  context.reportProgress(3, 5, stdout);
+                  context.reportProgress(options.step++, options.tally, 'ngc');
                   context.reportStatus('Compilation complete.');
                   observer.next();
               }

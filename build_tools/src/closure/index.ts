@@ -50,6 +50,7 @@ export function rollupRxJS(
       editFile('node_modules/rxjs/testing/package.json'),
       editFile('node_modules/rxjs/webSocket/package.json')])
         .then(data => {
+          context.reportProgress(options.step++, options.tally, 'rollup rxjs');
           observer.next();
         });
 
@@ -73,7 +74,8 @@ export function closure(
     exec(`java -jar ${jarPath} --warning_level=${warningLevel} --flagfile ${confPath} --js_output_file ${outFile} --output_manifest=${manifestPath}`,
         {},
         (error, stdout, stderr) => {
-          context.reportProgress(5, 5, stderr);
+          context.reportStatus(stderr);
+          context.reportProgress(options.step++, options.tally, 'closure');
           observer.next();
         });
     })
@@ -83,7 +85,8 @@ export function executeClosure(
   options: ClosureBuilderSchema,
   context: BuilderContext
 ): Observable<BuilderOutput> {
-  context.reportProgress(1, 5, 'ngc');
+  options.step = 0;
+  options.tally = 5;
   return of(context).pipe(
     concatMap( results => ngc(options, context) ),
     concatMap( results => compileMain(options, context) ),
