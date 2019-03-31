@@ -1,7 +1,6 @@
 import { ClosureBuilderSchema } from './closure/schema.interface';
 import { RollupBuilderSchema } from './rollup/schema.interface';
 
-
 import * as ts from 'typescript';
 
 import { exec } from 'child_process';
@@ -65,8 +64,8 @@ export function ngc(
                   context.reportStatus(stderr);
                   observer.error(stderr);
               } else {
-                  context.reportProgress(options.step++, options.tally, 'ngc');
                   context.reportStatus('Compilation complete.');
+                  context.reportProgress(options.step++, options.tally, 'ngc');
                   observer.next(stdout);
               }
         });

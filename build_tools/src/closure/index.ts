@@ -6,7 +6,7 @@ import { normalize, join } from 'path';
 import { writeFile, readFile } from 'fs';
 
 import { Observable, of } from 'rxjs';
-import { catchError, map, mapTo, concatMap } from 'rxjs/operators';
+import { catchError, mapTo, concatMap } from 'rxjs/operators';
 
 import { ClosureBuilderSchema } from './schema.interface';
 
@@ -17,7 +17,8 @@ export function rollupRxJS(
   context.reportStatus('rollup rxjs');
   return new Observable((observer) => {
 
-    let editFile = (filePath) => {
+    let rollup;
+    const editFile = (filePath) => {
       return new Promise((res) => {
         readFile(filePath, 'utf-8', (error, stdout) => {
           let pack = JSON.parse(stdout);
@@ -28,8 +29,6 @@ export function rollupRxJS(
         });
       });
     };
-
-    let rollup;
 
     if (process.platform === 'win32') {
       rollup = spawn('cmd', ['/c', join(context.workspaceRoot, 'node_modules', '.bin', 'rollup'), '-c', join('rollup.rxjs.js')]);
@@ -44,10 +43,10 @@ export function rollupRxJS(
     rollup.on('exit', () => {
 
       Promise.all([editFile('node_modules/rxjs/package.json'),
-      editFile('node_modules/rxjs/operators/package.json'),
-      editFile('node_modules/rxjs/ajax/package.json'),
-      editFile('node_modules/rxjs/testing/package.json'),
-      editFile('node_modules/rxjs/webSocket/package.json')])
+                   editFile('node_modules/rxjs/operators/package.json'),
+                   editFile('node_modules/rxjs/ajax/package.json'),
+                   editFile('node_modules/rxjs/testing/package.json'),
+                   editFile('node_modules/rxjs/webSocket/package.json')])
         .then(data => {
           context.reportProgress(options.step++, options.tally, 'rollup rxjs');
           observer.next(data);
@@ -64,6 +63,7 @@ export function closure(
   context.reportStatus('closure');
   return new Observable((observer) => {
 
+    // TODO: make these configurable
     const jarPath = join('node_modules', 'google-closure-compiler-java', 'compiler.jar');
     const warningLevel = 'QUIET';
     const confPath = normalize('closure.conf');
