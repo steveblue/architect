@@ -15,25 +15,38 @@ import { readFileSync, writeFile, readFile } from 'fs';
 
 import { AbstractBuilderSchema } from './abstract.interface';
 
-export async function optimizeBuild(
+
+export function handleEnvironment(
     options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
     context: BuilderContext
-  ): Promise<{}> {
+  ): Observable<{}> {
 
-      // TODO: convert to Observable pattern
-      const files = glob.sync(normalize('out-tsc/**/*.component.js'));
+    // TODO: handle different environments
+    return of(exec('cp '+
+                normalize('out-tsc/app/src/environments/environment.prod.js') + ' ' +
+                normalize('out-tsc/app/src/environments/environment.js')
+             ));
+}
 
-      return of(Promise.all(files.map((file) => {
-          return new Promise((res, rej) => {
-             readFile(file, 'utf-8', (err, data) => {
+export function optimizeBuild(
+    options: AbstractBuilderSchema | RollupBuilderSchema | ClosureBuilderSchema,
+    context: BuilderContext
+  ): Observable<{}> {
+
+    // TODO: convert to Observable pattern
+    const files = glob.sync(normalize('out-tsc/**/*.component.js'));
+
+    return of(Promise.all(files.map((file) => {
+        return new Promise((res, rej) => {
+            readFile(file, 'utf-8', (err, data) => {
+            if (err) rej(err);
+            writeFile(file, buildOptimizer({ content: data }).content, (err) => {
                 if (err) rej(err);
-                writeFile(file, buildOptimizer({ content: data }).content, (err) => {
-                    if (err) rej(err);
-                    res(file);
-                });
+                res(file);
             });
-          })
-      })));
+        });
+        })
+    })));
 
 }
 
