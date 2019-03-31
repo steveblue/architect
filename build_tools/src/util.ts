@@ -41,7 +41,7 @@ export function compileMain(
             writeFile(outFile, outputContent.outputText, (err) => {
                context.reportProgress(options.step++, options.tally, 'aot');
                if (err) observer.error(err);
-               observer.next();
+               observer.next(outputContent.outputText);
             });
 
         });
@@ -66,7 +66,7 @@ export function ngc(
               } else {
                   context.reportProgress(options.step++, options.tally, 'ngc');
                   context.reportStatus('Compilation complete.');
-                  observer.next();
+                  observer.next(stdout);
               }
         });
 

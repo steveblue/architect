@@ -22,7 +22,6 @@ export function rollupRxJS(
         readFile(filePath, 'utf-8', (error, stdout) => {
           let pack = JSON.parse(stdout);
           pack.es2015 = pack.es2015.replace('_esm2015', '_fesm2015');
-          //log.message('editing ' + filePath);
           writeFile(filePath, JSON.stringify(pack), () => {
             res(filePath);
           })
@@ -38,12 +37,12 @@ export function rollupRxJS(
       rollup = spawn(join(context.workspaceRoot, 'node_modules', '.bin', 'rollup'), ['-c', join('rollup.rxjs.js')]);
     }
 
-    rollup.stdout.on('data', (msg) => {
-      //log.message(msg);
-    });
+    // rollup.stdout.on('data', (msg) => {
+    //   log.message(msg);
+    // });
 
     rollup.on('exit', () => {
-      //log.message('rollup completed');
+
       Promise.all([editFile('node_modules/rxjs/package.json'),
       editFile('node_modules/rxjs/operators/package.json'),
       editFile('node_modules/rxjs/ajax/package.json'),
@@ -51,7 +50,7 @@ export function rollupRxJS(
       editFile('node_modules/rxjs/webSocket/package.json')])
         .then(data => {
           context.reportProgress(options.step++, options.tally, 'rollup rxjs');
-          observer.next();
+          observer.next(data);
         });
 
     });
@@ -76,7 +75,7 @@ export function closure(
         (error, stdout, stderr) => {
           context.reportStatus(stderr);
           context.reportProgress(options.step++, options.tally, 'closure');
-          observer.next();
+          observer.next(stdout);
         });
     })
 }

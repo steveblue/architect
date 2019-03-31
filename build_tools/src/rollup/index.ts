@@ -23,7 +23,7 @@ export function rollup(
                     observer.error(error);
                 } else {
                     context.reportProgress(options.step++, options.tally, 'rollup');
-                    observer.next(stderr);
+                    observer.next(stdout);
                 }
 
         });
