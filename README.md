@@ -111,14 +111,14 @@ This is well and good however AOT compilation spits out a module called `Lazy1Mo
 () => import('./lazy1.module.ngfactory').then(m => m.Lazy1ModuleNgFactory)
 ```
 
-Lazyloading with Closure Compiler is possible but requires some work to figure out code splitting.
+Lazyloading with Closure Compiler is possible but requires some work to figure out how to code split the application.
 
 The workflow that has worked in the past is as follows:
 
 - bundle all modules separately with compiler.jar (main.js, lazy1.module.ngfactory.js, etc)
 - use output manifest to find duplicate dependencies
 - pull shared dependencies into vendor chunk
-- load unique module dependencies into module chunk(s)
+- pull unique module dependencies into module chunk(s)
 - write .conf file that configures closure compiler to bundle chunks
 - run compiler.jar application to optimize project
 
@@ -127,7 +127,7 @@ Proposed new workflow:
 - query project for lazyloaded modules
 - find dependencies for each module
 - pull shared dependencies into vendor chunk
-- load unique dependencies into module chunk(s)
+- pull unique dependencies into module chunk(s)
 - write .conf file that configures closure compiler to bundle chunks
 - run compiler.jar application to optimize project
 
