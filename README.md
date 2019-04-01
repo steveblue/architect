@@ -98,14 +98,18 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Lazyloading
 
-Lazyloading is possible with Rollup in this branch, however will require some postprocessing of the AOT compiled code to get it right. Lazyloading with Closure Compiler is also possible, however a method is needed for code splitting. Closure Compiler could make output chunks more optimal than Rollup.
+Lazyloading is possible with Rollup, however will require some postprocessing of the AOT compiled code to get it right.
+
+Lazyloading with Closure Compiler is also possible, however a method is needed for code splitting. Closure Compiler could make output chunks more optimal than Rollup.
 
 A lazyloaded route typically looks like this.
 ```
 { path: '', loadChildren: './routes/lazy1/lazy1.module#Lazy1Module' }
 ```
 
-This is well and good however AOT compilation spits out a module called `Lazy1ModuleNgFactory` in a file called `lazy1.module.ngfactory` and Rollup puts all modules in a single directory. Rollup also requires import syntax and system.js to be included on the page. `s.js` can be used instead of `system.js`:
+This is well and good however AOT compilation spits out a module called `Lazy1ModuleNgFactory` in a file called `lazy1.module.ngfactory`. Angular CLI handles this kind of stuff for us, but in a custom build we are on our own.
+
+Rollup puts all modules in a single directory. Rollup also requires import syntax and SystemJS to be included on the page. `s.js` can be used instead of `system.js`:
 
 ```
 () => import('./lazy1.module.ngfactory').then(m => m.Lazy1ModuleNgFactory)
@@ -116,18 +120,20 @@ Lazyloading with Closure Compiler is possible but requires some work to figure o
 The workflow that has worked in the past is as follows:
 
 - bundle all modules separately with compiler.jar (main.js, lazy1.module.ngfactory.js, etc)
-- use output manifest to find duplicate dependencies
-- pull shared dependencies into vendor chunk
-- pull unique module dependencies into module chunk(s)
+- analyze output manifest to find duplicate dependencies
+- store paths to shared dependencies into Array
+- store paths to main bundle files in Array
+- store paths unique module dependencies & module files in Array(s)
 - write .conf file that configures closure compiler to bundle chunks
 - run compiler.jar application to optimize project
 
-Proposed new workflow:
+Proposed new workflow that could speed things up:
 
 - query project for lazyloaded modules
-- find dependencies for each module
-- pull shared dependencies into vendor chunk
-- pull unique dependencies into module chunk(s)
+- analyze dependencies for each module
+- store paths to shared dependencies into Array
+- store paths to main bundle files in Array
+- store paths unique module dependencies & module files in Array(s)
 - write .conf file that configures closure compiler to bundle chunks
 - run compiler.jar application to optimize project
 
