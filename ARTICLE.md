@@ -73,8 +73,6 @@ The Angular community was rallying around webpack at ng-conf 2017, however I was
 # Every bundle I throw at Closure Compiler optimizes better than Webpack and Uglify.
 (and Terser)
 
-
-
 ![](https://media.giphy.com/media/l3q2DgSFjbAyseViM/giphy.gif)
 
 That statement comes with a few caveats.
@@ -881,6 +879,8 @@ Closure Compiler bundled and optimized the app ~37.3Kb (gzipped).
 # ~14% reduction in bundle size
 
 Thats a ~14% smaller bundle for this simple app! At scale that 14% can make a real tangible difference. These estimates include optimizations with @angular-devkit/build-optimizer and are served with gzip compression.
+
+There are other advantages to using Closure Compiler instead of Webpack. Closure provides warnings about potentially dangerous vulnerabilities in our application. This helps keep our applications secure. Closure Compiler also optimizes JavaScript in interesting ways, transforming the actual code to make it run more performantly in the browser.
 
 ## Conclusion
 
