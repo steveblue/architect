@@ -10,7 +10,7 @@
       "prefix": "app",
       "schematics": {},
       "architect": {
-        "closure": {
+        "closure_build": {
           "builder": "./build_tools/dist:closure",
           "options": {
             "closureConfig": "closure.conf",

@@ -6,7 +6,8 @@
     "types": []
   },
   "angularCompilerOptions": {
-    "enableIvy": false
+    "annotationsAs": "static fields",
+    "annotateForClosureCompiler": true
   },
   "exclude": [
     "test.ts",
