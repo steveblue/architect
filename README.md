@@ -2,35 +2,24 @@
 
 Building with Rollup and Closure Compiler using Angular Architect.
 
+This repo accompanies the blog series [Build Angular Like An Architect on dev.to](https://dev.to/steveblue/build-angular-like-an-architect-part-1-3ph2
+).
+
+
 This project allows you to do the following:
 
 ```bash
-ng run app:rollup
+architect build_repo:rollup
 ```
 
 builds workspace with Rollup.
 
 
 ```bash
-ng run app:closure
+architect build_repo:closure_build
 ```
 
 builds workspace with Closure Compiler.
-
-NOTE:
-
-This is currently an additional step needed to bundle with Closure Compiler.
-
-```
-code ./node_modules/tslib/package.json
-```
-
-Add this line to the tslib package.json.
-
-```
-"es2015": "tslib.es6.js",
-```
-
 
 
 ## Getting started
