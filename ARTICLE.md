@@ -8,7 +8,7 @@ You can check out the final code [in this Github repository](https://github.com/
 
 ### How did we get here?
 
-Ever since the @angular/cli moved to webpack it was hard to integrate with other build tooling and still retain the benefits of the cli. Only a few efforts have been made to extend the cli. [nx](https://nx.dev) goes as far to enable faster development in a monorepo, incrementally building only code that has changed.
+Ever since the @angular/cli moved to webpack it was hard to integrate with other build tooling and still retain the benefits of the cli. Only a few efforts have been made to extend the cli. [nx](https://nx.dev) is one example, going as far to enable faster development in a monorepo, incrementally building only code that has changed.
 
 The cli was so tightly coupled with webpack at times it led to awkward customization of webpack itself.
 
