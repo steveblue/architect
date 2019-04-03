@@ -1,10 +1,10 @@
-I 🤓out on build tooling.
+I 🤓 out on build tooling.
 
 Since Angular 2 was in released I've been experimenting with different ways to build apps. Most developers don't need to worry about how their application is built because @angular/cli makes it so easy. The cli hides all the complexity and for good reason. Engineers need to focus on implementing features and bugfixes. Let's face it. Building complex enterprise applications is difficult. It can be a lot of work to put all the pieces together, let alone make build tooling do things like code split an application.
 
-In Build Angular Like An Architect (Part 1) we look at why someone would want to write a custom Angular build. I then detail how to code a new Builder with @angular-devkit and execute the Builder with the Architect CLI.
+In Build Angular Like An Architect (Part 1) we briefly look at why someone would want to write a custom Angular build and how we got here. We then scaffold a new Builder using the API provided in @angular-devkit/architect package, code the build with RxJS Observables and learn how to extend the @angular/cli with a new production build that bundles Angular with Closure Compiler instead of Webpack.
 
-You can check out the final code [in this Github repository](https://github.com/steveblue/architect).
+You can check out the code [in this Github repository](https://github.com/steveblue/architect).
 
 ### How did we get here?
 
@@ -18,8 +18,11 @@ Prior to Angular 6 you could eject the webpack config with `ng eject` to customi
 
 With the release of Angular 6 this API was deprecated when a complete rewrite of @angular/cli abstracted portions of the tool. The cli became a wrapper around @angular-devkit. Running a `ng` command just meant you were triggering "architect" targets that ran "builders". This kind of abstraction makes tools like nx possible.
 
-- Builders allow you to code custom builds with TypeScript
-- Architect lets you to define targets that run Builders.
+The useful bits of the API are as follows:
+
+- Builders enable you to code custom builds with TypeScript and RxJS
+- Architect lets you to define targets that run Builders
+- Architect CLI provides a way to test builders in a workspace
 
 Advanced users could customize a their tooling enough to provide a custom webpack config by coding a Builder and using Architect to establish targets that execute the Builder. If you did though you ran the risk of breaking changes in the API which was due to become stable in Angular 8. @angular-devkit/architect was considered experimental, that is up until [commits like this one](https://github.com/angular/angular-cli/commit/e41e10d313ad49e632ed1f9d6e7e563b3eb2fd09) landed in the @angular/cli repository on Github.
 
@@ -29,14 +32,14 @@ This is such a game changer for one reason alone. @angular/cli is becoming exten
 
 ![](https://media.giphy.com/media/kVRBvsiOyBM8o/giphy.gif)
 
-Builders allow us to extend the Angular CLI to build Angular however we want!
+Builders allow us to extend the Angular CLI to do things we never thought were possible before!
 
 Here are a few examples of how you could extend the CLI with a Builder.
 
 
 - Run unit tests with Jest instead of Karma
 - Execute e2e tests with TestCafe instead of Selenium and Protractor
-- Optimize production bundles with Closure Compiler instead of Webpack and Terser
+- Optimize production bundles with a tool other than Webpack
 - Use a custom node server
 - Provide a custom Webpack config like [@angular-devkit/build-webpack](https://github.com/angular/angular-cli/tree/master/packages/angular_devkit/build_webpack)
 
@@ -62,24 +65,22 @@ In this tutorial we look at building Angular by coding a Builder that optimizes 
 
 > Closure Compiler is a tool for making JavaScript download and run faster. Instead of compiling from a source language to machine code, it compiles from JavaScript to better JavaScript. It parses your JavaScript, analyzes it, removes dead code and rewrites and minimizes what's left. It also checks syntax, variable references, and types, and warns about common JavaScript pitfalls.
 
-At ng-conf 2017 the Angular team announced the AOT compiler is compatible with Closure Compiler in Angular 4. The AOT compiler converts TypeScript type annotations to JSDoc style annotations Closure Compiler can interpret using a compiler flag (`annotateForClosureCompiler`). Behind the scenes a tool called tsickle converts the annotations. This feature would enable wide adoption of Angular at Google where teams are mandated to optimize JavaScript with Closure Compiler.
+At ng-conf 2017 the Angular team announced the AOT compiler is compatible with Closure Compiler in Angular 4. The AOT compiler converts TypeScript type annotations to JSDoc style annotations Closure Compiler can interpret. You can unlock this feature with a compiler flag. Behind the scenes a tool called tsickle converts the annotations. This feature would enable wide adoption of Angular at Google where teams are mandated to optimize JavaScript with Closure Compiler.
 
 
 ![](https://media.giphy.com/media/3SBi8gMf8BqBG/giphy.gif)
 
 
-The Angular community was rallying around webpack at ng-conf 2017, however I was naturally curious about Closure Compiler. At development conferences you might find me listening in on a talk, typing away on my laptop experimenting with something I just learned about. At ng-conf 2017 I put together a proof of concept where I could bundle Angular with Closure Compiler. The results were impressive. I kept going and abstracted the steps into another cli tool called `ngr`. That's because ...
+The Angular community was rallying around webpack at ng-conf 2017, however I was naturally curious about Closure Compiler. At development conferences you might find me listening in on a talk, typing away on my laptop experimenting with something I just learned about. At ng-conf I coded a proof of concept where I could bundle Angular with Closure Compiler. The results were impressive. I kept going and abstracted the steps into another cli tool called [ngr](https://github.com/steveblue/angular2-rollup). That's because ...
 
 # Every bundle I throw at Closure Compiler optimizes better than Webpack and Uglify.
 (and Terser)
 
 ![](https://media.giphy.com/media/l3q2DgSFjbAyseViM/giphy.gif)
 
-That statement comes with a few caveats.
-
 Angular must be built ahead of time (AOT) and the ahead of time compiled code. Closure Compiler must be in ADVANCED_OPTIMIZATIONS mode to ensure the smallest bundle possible. It also doesn't hurt to use @angular-devkit/build-optimizer. When the new Ivy compiler is final (Angular 9) we will see even better optimizations, but for now we have the AOT compiler.
 
-The Angular community is quite fortunate that Angular has been compatible with Closure Compiler since Angular 4. React engineers have tried and failed to get React to optimize with Closure Compiler in ADVANCED_OPTIMIZATIONS mode, concluding ["it'll be more trouble than it's worth at this point"](https://github.com/facebook/react/issues/11092). Everyone in the JavaScript community should be able to optimize code with such an incredible tool. It does take a lot of annotation to reap the rewards of ADVANCED_OPTIMIZATIONS, a mode in Closure Compiler that is very aggressive to achieve the highest compression possible. If we are diligent in maintaining a type safe TypeScript application, tsickle does all the work for us.
+The Angular community is quite fortunate that Angular is compatible with Closure Compiler. Not many other libraries or frameworks can claim to be able to generate bundles fully optimized with Closure Compiler. [The React team](https://github.com/facebook/react/issues/11092) gave up trying to support Closure Compiler in ADVANCED_OPTIMIZATIONS mode. You have to annotate JavaScript pretty heavily to reap the full rewards of ADVANCED_OPTIMIZATIONS, a mode in Closure Compiler that is very aggressive at achieving the highest compression possible. Angular developers already code with TypeScript. It should be considered a best practice to maintain a type safe application anyways. If you do you will get a highly optimized bundle with Closure Compiler!
 
 It would be much easier to adopt Closure Compiler if the tool was available in @angular/cli.
 
@@ -112,7 +113,7 @@ We can optimize the application prior to bundling with @angular-devkit/build-opt
 
 @angular/cli has this concept of environments where engineers can `import { environment } from './environment'`.  `environment` is an Object with configuration for each environment. To make a custom build friendly with @angular/cli we should support this API as well. Basically what needs to happen is the content of `environment.js` in the out-tsc directory needs to be swapped out with `environment.${env}.js` .
 
-To bundle with Closure Compiler we need a new configuration file: closure.conf. More on this later. Closure Compiler is a Java application distributed in `google-closure-compiler-java` package. Closure Compiler also provides a JavaScript API but in practice I've found the Java implementation to be more reliable.
+To bundle with Closure Compiler we need a new configuration file: closure.conf. More on this later. Closure Compiler is a Java application distributed in google-closure-compiler-java package. Closure Compiler also provides a JavaScript API but in practice I've found the Java implementation to be more reliable.
 
 
 ![](https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif)
@@ -140,7 +141,6 @@ Install the latest cli and architect packages globally using the `next`  version
 Architect development relies on node > 10.14.1. Check which version of node you are running with `which node` and update node accordingly.
 
 ```bash
-
 npm i -g @angular/cli@next @angular-devkit/architect@next @angular-devkit/architect-cli@next
 ```
 
@@ -163,7 +163,7 @@ npm i google-closure-compiler tsickle --save-dev
 
 ### build_tools
 
-Make a new directory called `build_tools` in the root of your project.
+Make a new directory called ‘build_tools’ in the root of your project.
 
 Let's review the files we should have in the root directory.
 
@@ -174,7 +174,7 @@ Let's review the files we should have in the root directory.
 | angular.json  |  Angular app workspace configuration  |
 
 
-Create several new files in the `build_tools` directory. Below is a description of what each file does.
+Create several new files in the build_tools directory. Below is a description of what each file does.
 
 
 | file  | description |
@@ -211,7 +211,7 @@ Make a package.json in the build_tools directory. The file should look like the 
 
 ```
 
-The package.json is necessary for @angular/cli to establish the location of `builders.json` and also to install the dependencies needed to develop the Builder.
+The package.json is necessary for @angular/cli to establish the location of builders.json and also to install the dependencies needed to develop the Builder.
 
 Run `npm install` in the build_tools directory.
 
@@ -248,7 +248,7 @@ builders.json establishes the target Architect needs to point to each Builder. I
 
 While on the topic of schema, we might as well declare the schema for the Closure Compiler Builder. Builder schema establishes the outward facing API for the Builder.
 
-In './src/closure/schema.json' we define two required properties an engineer will need to provide in their workspace angular.json: `tsConfig` and `closureConfig`. These two properties map to the path of each configuration file: the tsconfig.json used to build Angular with the AOT compiler and the closure.conf used to bundle the application.
+In ./src/closure/schema.json we define two required properties an engineer will need to provide in their workspace angular.json: `tsConfig` and `closureConfig`. These two properties map to the path of each configuration file: the tsconfig.json used to build Angular with the AOT compiler and the closure.conf used to bundle the application.
 
 
 ```json
@@ -305,7 +305,7 @@ import { readFileSync } from 'fs';
 
 Next make a new file called schema.interface.ts in build_tools/src/closure and declare an interface for TypeScript that mirrors the json-schema we created earlier. There are ways to use the json-schema in lieu of a TypeScript interface, but for simplicity lets just declare the schema as an interface.
 
-```
+```typescript
 export interface ClosureBuilderSchema {
   tsConfig: string;
   closureConfig: string;
@@ -510,10 +510,7 @@ Solution 1:
 
 RxJS Observables are interoperable with Promises.
 
-```typescript
-of(new Promise)
-```
-is a thing. RxJs will convert Promises to Observables behind the scenes for us.
+`of(new Promise())` is a thing. RxJs will convert Promises to Observables behind the scenes for us.
 
 Solution 2:
 
@@ -878,9 +875,9 @@ Closure Compiler bundled and optimized the app ~37.3Kb (gzipped).
 
 # ~14% reduction in bundle size
 
-Thats a ~14% smaller bundle for this simple app! At scale that 14% can make a real tangible difference. These estimates include optimizations with @angular-devkit/build-optimizer and are served with gzip compression.
+Thats a ~14% smaller bundle for this simple app! At scale that 14% can make a real tangible difference. These estimates include optimizations with @angular-devkit/build-optimizer and are served with gzip compression. I’ve seen other apps where Closure Compiler made the bundle ~20% smaller than the same app mangled with Uglify.
 
-There are other advantages to using Closure Compiler instead of Webpack. Closure provides warnings about potentially dangerous vulnerabilities in our application. This helps keep our applications secure. Closure Compiler also optimizes JavaScript in interesting ways, transforming the actual code to make it run more performantly in the browser.
+There are other advantages to using Closure Compiler instead of Webpack. Closure provides warnings about potentially dangerous vulnerabilities. This helps keep web applications secure. Closure Compiler also optimizes JavaScript in interesting ways, transforming the actual code to make it run more performantly in the browser. These are great advantages Closure Compiler has over tools like Uglify or Terser.
 
 ## Conclusion
 
@@ -892,10 +889,7 @@ In my humble opinion, @angular-devkit/architect is the single largest improvemen
 
 That is an amazing feat for the Angular CLI team!
 
-
-## There's more on the way!
-
-![](https://media.giphy.com/media/xT1XGKfc0gwXshqA80/giphy.gif)
+![](https://media.giphy.com/media/1ylQyCK1qZ63vn0lS0/giphy.gif)
 
 In Build Angular like an Architect (Part 2) we look at angular-devkit/build-optimizer, figure out how to implement environments, and explore more parts of BuilderContext useful for logging and progress tracking.
 
