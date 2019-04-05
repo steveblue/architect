@@ -103,7 +103,7 @@ To build an Angular app for production we need to use the @angular/compiler-cli.
 ngc -p src/tsconfig.app.json
 ```
 
-This will output the AOT compiled application in the out-tsc directory, coincidentally where the cli puts it by default in a production build. That's because that is how the `outDir` is configured in src/tsconfig.app.json : `"outDir": "../out-tsc/app",`
+This will output the AOT compiled application in the out-tsc directory, coincidentally where the cli puts it by default in a production build. That's because that is how the `outDir` is configured in src/tsconfig.app.json : `"outDir": "../out-tsc",`
 
 We can optimize the application prior to bundling with @angular-devkit/build-optimizer. This package removes some code the compiler spit out that is not necessary, like the decorators we used in development.
 
@@ -621,13 +621,13 @@ architect build_repo:closure_build
 
 This directory will be filled with AOT compiled code that has the file extension `ngfactory.js`. All of our application logic has been compiled into these files.
 
-If we look closely at the ahead of time compiled code, we will see a problem with the entry point of the Angular application in out-tsc/app/src/main.js.
+If we look closely at the ahead of time compiled code, we will see a problem with the entry point of the Angular application in out-tsc/src/main.js.
 
 ```typescript
 platformBrowserDynamic().bootstrapModule(AppModule)
 ```
 
-The entry point is still referencing the `AppModule` found in out-tsc/app/src/app.module.js. We need our app to bootstrap with the ahead of time compiled  `AppModuleNgFactory` found in out-tsc/app/src/app.module.ngfactory.js instead.
+The entry point is still referencing the `AppModule` found in out-tsc/src/app/app.module.js. We need our app to bootstrap with the ahead of time compiled  `AppModuleNgFactory` found in out-tsc/src/app/app.module.ngfactory.js instead.
 
 @angular/cli takes care of this for us automatically when we run `ng serve` or `ng build`, Since we are coding a custom build, we need to transform the main.js ourselves.
 
@@ -657,7 +657,7 @@ export function compileMain(
   return new Observable((observer) => {
 
       const inFile = normalize(context.workspaceRoot+'/src/main.ts');
-      const outFile = normalize('out-tsc/app/src/main.js');
+      const outFile = normalize('out-tsc/src/main.js');
       const tsConfig = JSON.parse(readFileSync(join(context.workspaceRoot, options.tsConfig), 'utf8'));
 
       readFile(inFile, 'utf8', (err, contents) => {
@@ -707,7 +707,7 @@ Run the Architect CLI.
 architect build_repo:closure_build
 ```
 
-The file at out-tsc/src/app/main.js should call a `bootstrapModuleFactory` method on `platformBrowser` and pass in the `AppModuleNgFactory`.
+The file at out-tsc/src/main.js should call a `bootstrapModuleFactory` method on `platformBrowser` and pass in the `AppModuleNgFactory`.
 
 ```javascript
 platformBrowser().bootstrapModuleFactory(AppModuleNgFactory)
@@ -789,7 +789,7 @@ This particular closure.conf works with angular packages ~8.0.0-beta.10.
 --package_json_entry_names jsnext:main,es2015
 --process_common_js_modules
 
---entry_point=./out-tsc/app/src/main.js
+--entry_point=./out-tsc/src/main.js
 ```
 
 With the closure.conf in place, we can write a function in build_tools/src/closure/index.ts that executes the Java application in the google-closure-compiler-java package we installed earlier.
