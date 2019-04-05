@@ -31,7 +31,7 @@ class ResolveAngular {
 
 
 export default [{
-    input: 'out-tsc/app/src/main.js',
+    input: 'out-tsc/src/main.js',
     treeshake: true,
     output: {
         name: 'app',

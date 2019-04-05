@@ -17,7 +17,7 @@
             "tsConfig": "tsconfig.app.json"
           }
         },
-        "rollup": {
+        "rollup_build": {
           "builder": "./build_tools/dist:rollup",
           "options": {
             "rollupConfig": "rollup.config.js",

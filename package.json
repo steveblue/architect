@@ -1,15 +1,13 @@
 {
-  "name": "build_repo",
+  "name": "ivy",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --production",
+    "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "rollup": "architect build_repo:rollup",
-    "closure": "architect build_repo:closure_build"
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
@@ -21,14 +19,9 @@
     "@angular/platform-browser": "~8.0.0-beta.11",
     "@angular/platform-browser-dynamic": "~8.0.0-beta.11",
     "@angular/router": "~8.0.0-beta.11",
-    "compression": "^1.7.4",
-    "express": "^4.16.4",
-    "http": "^0.0.0",
-    "rollup-plugin-node-resolve": "^4.0.1",
-    "rollup-plugin-typescript2": "^0.20.1",
+    "core-js": "^2.5.4",
     "rxjs": "~6.4.0",
-    "tsickle": "^0.34.3",
-    "tslib": "^1.9.3",
+    "tslib": "^1.9.0",
     "zone.js": "~0.9.0"
   },
   "devDependencies": {
@@ -42,6 +35,8 @@
     "codelyzer": "^5.0.0",
     "compression": "^1.7.4",
     "express": "^4.16.4",
+    "google-closure-compiler": "^20190325.0.0",
+    "http": "0.0.0",
     "jasmine-core": "~3.3.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.0.1",
@@ -50,7 +45,12 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.0",
     "protractor": "~5.4.0",
+    "rollup": "^1.8.0",
+    "rollup-plugin-node-resolve": "^4.0.1",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-typescript2": "^0.20.1",
     "ts-node": "~7.0.0",
+    "tsickle": "^0.34.3",
     "tslint": "~5.13.1",
     "typescript": "~3.3.3333"
   }
