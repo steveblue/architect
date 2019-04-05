@@ -8,9 +8,7 @@ You can check out the code [in this Github repository](https://github.com/steveb
 
 ### How did we get here?
 
-Ever since the @angular/cli moved to webpack it was hard to integrate with other build tooling and still retain the benefits of the cli. Only a few efforts have been made to extend the cli. [nx](https://nx.dev) is one example, going as far to enable faster development in a monorepo, incrementally building only code that has changed.
-
-The cli was so tightly coupled with webpack at times it led to awkward customization of webpack itself.
+Ever since the @angular/cli moved to webpack it was hard to integrate with other build tooling and still retain the benefits of the cli. Only a few efforts have been made to extend the cli. [nx](https://nx.dev) is one example, going as far to enable faster development in a monorepo, incrementally building only code that has changed. The cli was so tightly coupled with webpack at times it led to awkward customization of webpack itself.
 
 ![eject](https://media.giphy.com/media/JGF7ctowtLGak/giphy.gif)
 
@@ -70,21 +68,19 @@ At ng-conf 2017 the Angular team announced the AOT compiler is compatible with C
 
 ![](https://media.giphy.com/media/3SBi8gMf8BqBG/giphy.gif)
 
+The Angular community was rallying around webpack at ng-conf 2017, however I was naturally curious about Closure Compiler. At development conferences you might find me listening in on a talk, typing away on my laptop experimenting with something I just learned about. At ng-conf I coded a proof of concept where I could bundle Angular with Closure Compiler. The results were impressive.
 
-The Angular community was rallying around webpack at ng-conf 2017, however I was naturally curious about Closure Compiler. At development conferences you might find me listening in on a talk, typing away on my laptop experimenting with something I just learned about. At ng-conf I coded a proof of concept where I could bundle Angular with Closure Compiler. The results were impressive. I kept going and abstracted the steps into another cli tool called [ngr](https://github.com/steveblue/angular2-rollup). That's because ...
-
-# Every bundle I throw at Closure Compiler optimizes better than Webpack and Uglify.
-(and Terser)
+## Every bundle I threw at Closure Compiler optimized better than Webpack and Uglify (and Terser).
 
 ![](https://media.giphy.com/media/l3q2DgSFjbAyseViM/giphy.gif)
 
 Angular must be built ahead of time (AOT) and the ahead of time compiled code. Closure Compiler must be in ADVANCED_OPTIMIZATIONS mode to ensure the smallest bundle possible. It also doesn't hurt to use @angular-devkit/build-optimizer. When the new Ivy compiler is final (Angular 9) we will see even better optimizations, but for now we have the AOT compiler.
 
-The Angular community is quite fortunate that Angular is compatible with Closure Compiler. Not many other libraries or frameworks can claim to be able to generate bundles fully optimized with Closure Compiler. [The React team](https://github.com/facebook/react/issues/11092) gave up trying to support Closure Compiler in ADVANCED_OPTIMIZATIONS mode. You have to annotate JavaScript pretty heavily to reap the full rewards of ADVANCED_OPTIMIZATIONS, a mode in Closure Compiler that is very aggressive at achieving the highest compression possible. Angular developers already code with TypeScript. It should be considered a best practice to maintain a type safe application anyways. If you do you will get a highly optimized bundle with Closure Compiler!
+The Angular community is quite fortunate that Angular is compatible with Closure Compiler, however adoption has been slow because Angular CLI only supported Webpack. Not many other libraries or frameworks can claim to be able to generate bundles fully optimized with Closure Compiler. [The React team](https://github.com/facebook/react/issues/11092) gave up trying to support Closure Compiler in its most aggressive mode for optimizing JavaScript.
 
-It would be much easier to adopt Closure Compiler if the tool was available in @angular/cli.
+You have to annotate JavaScript pretty heavily to reap the full rewards of ADVANCED_OPTIMIZATIONS, a mode in Closure Compiler that is very aggressive at achieving the highest compression possible. Angular itself is already annotated and libraries built to spec with the Angular Package Format are compatible as well. Thats because developers already code Angular with TypeScript and the AOT compiler will convert our types to annotations Closure Compiler can interpret. If you maintain a type safe application you will get a highly optimized bundle with Closure Compiler!
 
-Let's extend the cli to use Closure Compiler!
+Now we can extend Angular CLI to build with Closure Compiler with the Architect API so it should make adoption much easier. Let's figure out how to bundle an application with Closure Compiler in the CLI!
 
 ## How to build Angular with Architect CLI
 
@@ -98,7 +94,7 @@ First let's outline the steps we can take to build Angular.
 |---|---|---|
 | compile  |  compiles the app ahead of time  | @angular/compiler |
 | optimize  | remove unnecessary byproducts of compilation w/ (optional) | @angular-devkit/build_optimizer |
-| handle env | use the environments provided by cli (optional)  |  custom script |
+| handle env | use the environments provided by cli (optional)  | cp |
 | bundle  |  bundle and mangle the AOT compiled code | google-closure-compiler |
 
 To build an Angular app for production we need to use the @angular/compiler-cli. If we were to do this manually we would evoke the compiler using the `ngc` command.
@@ -118,18 +114,13 @@ To bundle with Closure Compiler we need a new configuration file: closure.conf. 
 
 ![](https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif)
 
-
-You want me to build my JavaScript project with Java?
-
-Yes, Closure Compiler makes more performant bundles!
-
 To manually run the Closure Compiler application we can use arguments on the command line.
 
 ```
 java -jar ${jarPath} --flagFile ${confFile} --js_output_file ${outFile}
 ```
 
-That's it! In this tutorial we will take care of the mandatory steps 1 and 4, running the AOT compiler and closure compiler.
+That's it! In this tutorial we will take care of the mandatory steps 1 and 4, running the AOT compiler and optimizing a single bundle with Closure Compiler.
 
 In Build Angular like an Architect (Part 2) we add environments and optimize the bundle even more with @angular-devkit/build-optimizer. If you want a sneak peak at how this is done, [check out the Github repository](https://github.com/steveblue/architect/blob/master/build_tools/src/util.ts).
 
@@ -153,7 +144,7 @@ ng new build_repo
 We called the application build_repo.
 
 If you don't already have it installed, also download and install  [latest Java SDK from Oracle](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-). This will allow us to run the Closure Compiler Java application.
+). Now you can run the Closure Compiler Java application.
 
 Install Closure Compiler and tsickle in the project workspace.
 
@@ -592,20 +583,19 @@ export function ngc(
   context: BuilderContext
 ): Observable<{}> {
 
-    return new Observable((observer) => {
+  return new Observable((observer) => {
 
-        exec(normalize(context.workspaceRoot +'/node_modules/.bin/ngc') +
-             ' -p ' + options.tsConfig,
-             {},
-             (error, stdout, stderr) => {
-              if (stderr) {
-                  observer.error(stderr);
-              } else {
-                  observer.next(stdout);
-              }
-        });
-
+    exec(`${normalize(context.workspaceRoot +'/node_modules/.bin/ngc')} -p ${options.tsConfig}`,
+          {},
+          (error, stdout, stderr) => {
+          if (stderr) {
+              observer.error(stderr);
+          } else {
+              observer.next(stdout);
+          }
     });
+
+  });
 
 }
 ```
@@ -877,7 +867,7 @@ Closure Compiler bundled and optimized the app ~37.3Kb (gzipped).
 
 Thats a ~14% smaller bundle for this simple app! At scale that 14% can make a real tangible difference. These estimates include optimizations with @angular-devkit/build-optimizer and are served with gzip compression. I’ve seen other apps where Closure Compiler made the bundle ~20% smaller than the same app mangled with Uglify.
 
-There are other advantages to using Closure Compiler instead of Webpack. Closure provides warnings about potentially dangerous vulnerabilities. This helps keep web applications secure. Closure Compiler also optimizes JavaScript in interesting ways, transforming the actual code to make it run more performantly in the browser. These are great advantages Closure Compiler has over tools like Uglify or Terser.
+There are other advantages to using Closure Compiler instead of Webpack. Closure provides warnings about potentially dangerous vulnerabilities. This helps keep web applications secure. Closure Compiler also optimizes JavaScript in interesting ways, transforming the actual code to make it run more performantly in the browser.
 
 ## Conclusion
 
@@ -885,9 +875,7 @@ In Build Angular like an Architect (Part 1) we looked at how to code a Builder a
 
 The source code for [Build Angular Like An Architect is available on Github](https://github.com/steveblue/architect).
 
-In my humble opinion, @angular-devkit/architect is the single largest improvement to the Angular CLI since schematics were released. We can now extend Angular CLI to perform any task we can imagine! Angular CLI is becoming so extensible it may be able to build any JavaScript project not just Angular.
-
-That is an amazing feat for the Angular CLI team!
+In my humble opinion, @angular-devkit/architect is the single largest improvement to the Angular CLI since schematics were released. Angular CLI is becoming so extensible it may even be able to build any JavaScript project not just Angular. We can now extend the cli to perform any task we can imagine! That is an amazing feat for the Angular CLI team!
 
 ![](https://media.giphy.com/media/1ylQyCK1qZ63vn0lS0/giphy.gif)
 
