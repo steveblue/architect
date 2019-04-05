@@ -23,8 +23,8 @@ export function handleEnvironment(
 
     // TODO: handle different environments
     return of(exec('cp '+
-                normalize('out-tsc/app/src/environments/environment.prod.js') + ' ' +
-                normalize('out-tsc/app/src/environments/environment.js')
+                normalize('out-tsc/src/environments/environment.prod.js') + ' ' +
+                normalize('out-tsc/src/environments/environment.js')
              ));
 }
 
@@ -58,7 +58,7 @@ export function compileMain(
     return new Observable((observer) => {
 
         const inFile = normalize(context.workspaceRoot+'/src/main.ts');
-        const outFile = normalize('out-tsc/app/src/main.js');
+        const outFile = normalize('out-tsc/src/main.js');
         const tsConfig = JSON.parse(readFileSync(join(context.workspaceRoot, options.tsConfig), 'utf8'));
 
         readFile(inFile, 'utf8', (err, contents) => {
