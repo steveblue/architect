@@ -9,10 +9,12 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "rollup": "architect build_repo:rollup",
-    "closure": "architect build_repo:closure"
+    "closure": "architect build_repo:closure_build"
   },
   "private": true,
   "dependencies": {
+    "@angular-devkit/architect": "^0.800.0-beta.11",
+    "@angular-devkit/architect-cli": "^0.800.0-beta.11",
     "@angular-devkit/build-angular": "^0.800.0-beta.10",
     "@angular/animations": "~8.0.0-beta.10",
     "@angular/common": "~8.0.0-beta.10",
@@ -33,7 +35,7 @@
     "zone.js": "~0.9.0"
   },
   "devDependencies": {
-    "@angular/cli": "^8.0.0-beta.10",
+    "@angular/cli": "^8.0.0-beta.11",
     "@angular/compiler-cli": "~8.0.0-beta.10",
     "@angular/language-service": "~8.0.0-beta.10",
     "@types/jasmine": "~3.3.12",
