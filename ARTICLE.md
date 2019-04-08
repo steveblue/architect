@@ -132,7 +132,7 @@ Install the latest cli and architect packages globally using the `next`  version
 Architect development relies on node > 10.14.1. Check which version of node you are running with `which node` and update node accordingly.
 
 ```bash
-npm i -g @angular/cli@next @angular-devkit/architect@next @angular-devkit/architect-cli@next
+npm i -g @angular/cli@next @angular-devkit/core@next @angular-devkit/architect@next @angular-devkit/architect-cli@next
 ```
 
 Create a new application workspace with @angular/cli.
